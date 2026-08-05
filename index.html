@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FLUS OS</title>
+<title>T9 OS</title>
 
 <link rel="stylesheet" href="style.css">
 </head>
@@ -13,70 +13,89 @@
 <!-- Pantalla de bloqueo -->
 <div id="lockScreen">
 
-    <h1>FLUS OS</h1>
+    <div class="loginBox">
 
-    <input type="password"
-    id="password"
-    placeholder="Contraseña">
+        <h1>T9 OS</h1>
 
-    <button onclick="login()">
-        Entrar
-    </button>
+        <p>Iniciar sesión</p>
 
-    <p id="error"></p>
+        <input
+        id="password"
+        type="password"
+        placeholder="Contraseña">
+
+        <button id="loginBtn">
+            Entrar
+        </button>
+
+        <p id="loginError"></p>
+
+    </div>
 
 </div>
 
 <!-- Escritorio -->
-<div id="desktop" style="display:none;">
-
-    <div id="wallpaper"></div>
+<div id="desktop">
 
     <div id="desktopIcons">
 
-        <div class="icon" id="addGame">
-            ➕
-            <br>
-            Add Games
+        <div class="desktopIcon" id="addGames">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828925.png">
+
+            <span>Add Games</span>
+
         </div>
 
-        <div class="icon" id="settings">
-            ⚙️
-            <br>
-            Configuración
+        <div class="desktopIcon" id="settingsApp">
+
+            <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png">
+
+            <span>Configuración</span>
+
         </div>
 
     </div>
 
+    <!-- Barra -->
     <div id="taskbar">
 
-        <div id="startButton">
-            FLUS
+        <button id="startButton">
+            T9
+        </button>
+
+        <div id="taskbarClock">
+
+            00:00
+
         </div>
 
-        <div id="clock">
-            00:00
-        </div>
+    </div>
+
+</div>
+
+<!-- Ventana -->
+<div id="window">
+
+    <div id="windowHeader">
+
+        <span id="windowTitle">
+            T9 OS
+        </span>
+
+        <button id="closeWindow">
+            ✖
+        </button>
+
+    </div>
+
+    <div id="windowContent">
 
     </div>
 
 </div>
 
 <script src="script.js"></script>
-<div id="window" class="window" style="display:none;">
-
-    <div class="titleBar">
-        <span id="windowTitle">FLUS OS</span>
-        <button id="closeWindow">✕</button>
-    </div>
-
-    <iframe
-        id="gameFrame"
-        src=""
-        frameborder="0">
-    </iframe>
-
-</div>
 
 </body>
 </html>
