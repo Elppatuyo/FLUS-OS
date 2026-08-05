@@ -1,69 +1,73 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FLUS OS</title>
-
-<link rel="stylesheet" href="style.css">
+    <title>My Web OS</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<!-- Pantalla de bloqueo -->
-<div id="lockScreen">
-
-    <h1>FLUS OS</h1>
-
-    <input type="password"
-    id="password"
-    placeholder="Contraseña">
-
-    <button onclick="login()">
-        Entrar
-    </button>
-
+<div id="login">
+    <h1>My OS</h1>
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Enter</button>
     <p id="error"></p>
+</div>
+
+
+<div id="desktop" style="display:none">
+
+    <div id="topbar">
+        <button onclick="openSettings()">⚙️</button>
+    </div>
+
+    <div id="apps"></div>
+
+    <button id="addButton" onclick="openAddApp()">+</button>
 
 </div>
 
-<!-- Escritorio -->
-<div id="desktop" style="display:none;">
 
-    <div id="wallpaper"></div>
+<div id="settings" class="window">
+    <h2>Settings</h2>
 
-    <div id="desktopIcons">
+    <p>Wallpaper URL:</p>
+    <input id="wallpaperURL" placeholder="https://...">
+    <button onclick="changeWallpaper()">Apply</button>
 
-        <div class="icon" id="addGame">
-            ➕
-            <br>
-            Add Games
-        </div>
+    <p>Theme:</p>
+    <button onclick="darkMode()">Dark</button>
+    <button onclick="lightMode()">Light</button>
 
-        <div class="icon" id="settings">
-            ⚙️
-            <br>
-            Configuración
-        </div>
+    <p>Music URL:</p>
+    <input id="musicURL" placeholder="https://...">
+    <button onclick="playMusic()">Play</button>
 
-    </div>
+    <p>FPS:</p>
+    <div id="fps">FPS: 0</div>
 
-    <div id="taskbar">
+    <button onclick="closeSettings()">Close</button>
+</div>
 
-        <div id="startButton">
-            FLUS
-        </div>
 
-        <div id="clock">
-            00:00
-        </div>
+<div id="addApp" class="window">
 
-    </div>
+<h2>Add Game/App</h2>
+
+<input id="appName" placeholder="App name">
+
+<input id="appLink" placeholder="www.example.com">
+
+<input id="appImage" placeholder="Image URL">
+
+<button onclick="addApp()">Add</button>
+
+<button onclick="closeAddApp()">Close</button>
 
 </div>
+
 
 <script src="script.js"></script>
 
 </body>
 </html>
-
