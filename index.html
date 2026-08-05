@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLUS OS</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- Pantalla de bloqueo -->
+<div id="lockScreen">
+
+    <h1>FLUS OS</h1>
+
+    <input type="password"
+    id="password"
+    placeholder="Contraseña">
+
+    <button onclick="login()">
+        Entrar
+    </button>
+
+    <p id="error"></p>
+
+</div>
+
+<!-- Escritorio -->
+<div id="desktop" style="display:none;">
+
+    <div id="wallpaper"></div>
+
+    <div id="desktopIcons">
+
+        <div class="icon" id="addGame">
+            ➕
+            <br>
+            Add Games
+        </div>
+
+        <div class="icon" id="settings">
+            ⚙️
+            <br>
+            Configuración
+        </div>
+
+    </div>
+
+    <div id="taskbar">
+
+        <div id="startButton">
+            FLUS
+        </div>
+
+        <div id="clock">
+            00:00
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
 
