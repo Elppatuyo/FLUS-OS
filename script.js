@@ -1,24 +1,32 @@
-const passwordCorrecta = "123";
+// Contraseña temporal
+const PASSWORD = "123";
 
-document.body.innerHTML = `
-<div id="login">
-  <h1>Windows OS</h1>
-  <input id="password" type="password" placeholder="Contraseña">
-  <button id="btnEntrar">Entrar</button>
-</div>
+// Entrar al sistema
+function login() {
+    const input = document.getElementById("password").value;
+    const error = document.getElementById("error");
 
-<div id="os" style="display:none;">
-  <h1>Bienvenido a tu OS</h1>
-</div>
-`;
+    if (input === PASSWORD) {
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("desktop").style.display = "block";
+    } else {
+        error.textContent = "Contraseña incorrecta";
+    }
+}
 
-document.getElementById("btnEntrar").onclick = function() {
-  const password = document.getElementById("password").value;
+// Actualizar reloj
+function updateClock() {
+    const clock = document.getElementById("clock");
 
-  if (password === passwordCorrecta) {
-    document.getElementById("login").style.display = "none";
-    document.getElementById("os").style.display = "block";
-  } else {
-    alert("Contraseña incorrecta");
-  }
-};
+    if (!clock) return;
+
+    const now = new Date();
+
+    const h = String(now.getHours()).padStart(2, "0");
+    const m = String(now.getMinutes()).padStart(2, "0");
+clock.textContent = `${h}:${m}`;
+
+    clock.textContent = `${h}:${m}`;
+}
+
+setInterval(updateClock, 1000);
