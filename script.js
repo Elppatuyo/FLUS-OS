@@ -24,7 +24,8 @@ function updateClock() {
 
     const h = String(now.getHours()).padStart(2, "0");
     const m = String(now.getMinutes()).padStart(2, "0");
-clock.textContent = `${h}:${m}`;
+
+    clock.textContent = `${h}:${m}`;
 }
 
 setInterval(updateClock, 1000);
