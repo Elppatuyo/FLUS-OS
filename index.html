@@ -3,90 +3,714 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>T9 OS</title>
+<title>NOVA OS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-<link rel="stylesheet" href="style.css">
+  :root{
+    --accent: #7C5CFC;
+    --accent-2: #37E6C4;
+    --bg-0: #0A0D14;
+    --bg-1: #11151F;
+    --bg-2: #181D2A;
+    --panel: rgba(20,24,36,0.72);
+    --panel-solid: #151a26;
+    --border: rgba(255,255,255,0.08);
+    --text-0: #EDEFF6;
+    --text-1: #A6ACC0;
+    --text-dim: #666e85;
+    --radius: 14px;
+    --font-ui: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+  [data-theme="light"]{
+    --bg-0: #EDEEF4;
+    --bg-1: #E3E5EF;
+    --bg-2: #D9DBE8;
+    --panel: rgba(255,255,255,0.72);
+    --panel-solid: #ffffff;
+    --border: rgba(20,20,40,0.09);
+    --text-0: #14161F;
+    --text-1: #4a4f63;
+    --text-dim: #8a8fa3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; overflow:hidden;}
+  body{
+    font-family: var(--font-ui);
+    color: var(--text-0);
+    -webkit-font-smoothing: antialiased;
+  }
+  #root{position:relative; width:100vw; height:100vh; overflow:hidden;}
+
+  /* ---------- LOCK SCREEN ---------- */
+  #lock{
+    position:absolute; inset:0; z-index:900;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background: radial-gradient(ellipse at 30% 20%, #241a44 0%, #0A0D14 55%), linear-gradient(160deg,#0A0D14,#0d1120 60%);
+    background-size:cover;
+    transition: opacity .6s ease, filter .6s ease, transform .6s ease;
+  }
+  #lock.unlocking{opacity:0; filter:blur(12px); transform:scale(1.05); pointer-events:none;}
+  #lock .clock{
+    font-family: var(--font-mono); font-weight:700;
+    font-size: clamp(48px,10vw,96px); letter-spacing:2px; color:#fff;
+    text-shadow: 0 0 40px rgba(124,92,252,0.5);
+  }
+  #lock .date{color:#a6acc0; font-size:15px; margin-top:6px; text-transform:capitalize;}
+  #lock .lockbox{
+    margin-top:56px; display:flex; flex-direction:column; align-items:center; gap:14px;
+  }
+  #lock .avatar{
+    width:76px; height:76px; border-radius:50%;
+    background: linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px; font-weight:700; color:#0A0D14;
+    box-shadow: 0 0 0 4px rgba(255,255,255,0.06);
+  }
+  #lock .name{color:#fff; font-size:16px; font-weight:600; letter-spacing:.3px;}
+  #lock input{
+    width:240px; padding:12px 16px; border-radius:999px; border:1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06); color:#fff; font-family:var(--font-mono); font-size:15px;
+    text-align:center; letter-spacing:4px; outline:none;
+  }
+  #lock input:focus{border-color:var(--accent);}
+  #lock .hint{font-size:12px; color:var(--text-dim); font-family:var(--font-mono);}
+  #lock .err{color:#ff6b7a; font-size:12px; font-family:var(--font-mono); height:14px;}
+  #lock.shake .lockbox{animation: shake .4s;}
+  @keyframes shake{
+    0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);}
+    60%{transform:translateX(-6px);} 80%{transform:translateX(6px);}
+  }
+
+  /* ---------- DESKTOP ---------- */
+  #desktop{
+    position:absolute; inset:0; background-size:cover; background-position:center;
+    transition: filter .3s;
+  }
+  #desktop::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(0,0,0,0.25));
+  }
+
+  #icons{
+    position:absolute; top:20px; left:20px; display:flex; flex-direction:column; flex-wrap:wrap;
+    gap:6px; height:calc(100vh - 100px); align-content:flex-start;
+  }
+  .icon{
+    width:84px; padding:10px 6px; border-radius:10px; text-align:center; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:6px; user-select:none;
+  }
+  .icon:hover{background: rgba(255,255,255,0.08);}
+  .icon .ico{
+    width:46px; height:46px; border-radius:12px; background:var(--panel-solid);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    border:1px solid var(--border); box-shadow:0 4px 14px rgba(0,0,0,0.35);
+  }
+  .icon .ico img{width:100%; height:100%; object-fit:cover;}
+  .icon span{
+    font-size:11.5px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.7); line-height:1.2;
+    word-break:break-word;
+  }
+
+  /* + Add games button (top-right corner) */
+  #add-corner{
+    position:absolute; top:20px; right:20px; z-index:50;
+    display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer;
+    user-select:none;
+  }
+  #add-corner .plus{
+    width:52px; height:52px; border-radius:50%;
+    background: linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px; color:#0A0D14; font-weight:700;
+    box-shadow: 0 6px 24px rgba(124,92,252,0.45);
+    transition: transform .15s;
+  }
+  #add-corner:hover .plus{transform: scale(1.08) rotate(90deg);}
+  #add-corner .label{
+    font-size:11px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.7); font-weight:600;
+    text-align:center;
+  }
+
+  /* ---------- WINDOWS ---------- */
+  .win{
+    position:absolute; min-width:280px; min-height:200px;
+    background: var(--panel-solid); border:1px solid var(--border); border-radius:12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    display:flex; flex-direction:column; overflow:hidden;
+    backdrop-filter: blur(10px);
+  }
+  .win-bar{
+    height:40px; flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
+    padding:0 8px 0 14px; background: var(--bg-2); cursor:move; border-bottom:1px solid var(--border);
+  }
+  .win-title{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--text-0);}
+  .win-title img{width:16px; height:16px; border-radius:4px; object-fit:cover;}
+  .win-btns{display:flex; gap:6px;}
+  .win-btns button{
+    width:26px; height:26px; border:none; border-radius:7px; background:transparent; color:var(--text-1);
+    cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center;
+  }
+  .win-btns button:hover{background: rgba(255,255,255,0.08);}
+  .win-btns .close:hover{background:#e5484d; color:#fff;}
+  .win-body{flex:1; overflow:auto; position:relative; background:#000;}
+  .win-body iframe{width:100%; height:100%; border:none; background:#fff;}
+  .win.settings .win-body, .win.games .win-body{background:var(--bg-1); overflow-y:auto;}
+
+  /* ---------- TASKBAR ---------- */
+  #taskbar{
+    position:absolute; left:0; right:0; bottom:0; height:56px; z-index:400;
+    background: var(--panel); backdrop-filter: blur(18px);
+    border-top:1px solid var(--border);
+    display:flex; align-items:center; padding:0 10px; gap:8px;
+  }
+  #start-btn{
+    display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:10px;
+    background: transparent; border:none; cursor:pointer; color:var(--text-0);
+  }
+  #start-btn:hover{background: rgba(255,255,255,0.08);}
+  #start-btn .logo{
+    width:22px; height:22px; border-radius:6px;
+    background: conic-gradient(from 90deg, var(--accent), var(--accent-2), var(--accent));
+  }
+  #start-btn span{font-size:13px; font-weight:600;}
+  #taskbar-apps{display:flex; gap:6px; flex:1; overflow-x:auto;}
+  .task-item{
+    display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:8px;
+    background: rgba(255,255,255,0.05); border:1px solid transparent; cursor:pointer;
+    font-size:12px; color:var(--text-1); white-space:nowrap;
+  }
+  .task-item.active{border-color: var(--accent); color:var(--text-0);}
+  .task-item img{width:14px; height:14px; border-radius:3px; object-fit:cover;}
+  #tray{display:flex; align-items:center; gap:14px; padding-right:6px;}
+  #fps-tray{font-family:var(--font-mono); font-size:12px; color:var(--accent-2); display:none;}
+  #clock-tray{font-family:var(--font-mono); font-size:13px; text-align:right; line-height:1.2; color:var(--text-0);}
+  #clock-tray .d{font-size:10px; color:var(--text-dim);}
+
+  /* ---------- START MENU ---------- */
+  #start-menu{
+    position:absolute; left:10px; bottom:64px; width:300px; z-index:500;
+    background: var(--panel-solid); border:1px solid var(--border); border-radius:14px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.5); padding:14px;
+    display:none; flex-direction:column; gap:6px;
+  }
+  #start-menu.open{display:flex;}
+  .sm-item{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; cursor:pointer;
+    font-size:13px; font-weight:500; color:var(--text-0);
+  }
+  .sm-item:hover{background: rgba(124,92,252,0.12);}
+  .sm-icon{width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background: var(--bg-2); font-size:15px;}
+
+  /* ---------- MODAL: add game ---------- */
+  .modal-overlay{
+    position:absolute; inset:0; background:rgba(0,0,0,0.55); z-index:800;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .modal{
+    width:340px; background:var(--panel-solid); border:1px solid var(--border); border-radius:16px;
+    padding:22px; box-shadow:0 30px 80px rgba(0,0,0,0.5);
+  }
+  .modal h3{font-size:16px; margin-bottom:4px;}
+  .modal p.sub{font-size:12px; color:var(--text-dim); margin-bottom:16px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:11.5px; color:var(--text-1); margin-bottom:6px; font-weight:600;}
+  .field input{
+    width:100%; padding:10px 12px; border-radius:9px; border:1px solid var(--border);
+    background: var(--bg-1); color:var(--text-0); font-size:13px; outline:none; font-family:var(--font-ui);
+  }
+  .field input:focus{border-color:var(--accent);}
+  .field .err-msg{font-size:11px; color:#ff6b7a; margin-top:5px; display:none;}
+  .modal-actions{display:flex; gap:8px; margin-top:18px;}
+  .btn{
+    flex:1; padding:10px; border-radius:9px; border:none; cursor:pointer; font-size:13px; font-weight:600;
+    font-family:var(--font-ui);
+  }
+  .btn.primary{background: linear-gradient(135deg,var(--accent),var(--accent-2)); color:#0A0D14;}
+  .btn.ghost{background: transparent; color:var(--text-1); border:1px solid var(--border);}
+
+  /* ---------- SETTINGS PANEL ---------- */
+  .settings-wrap{padding:20px; display:flex; flex-direction:column; gap:22px;}
+  .s-section{background:var(--panel-solid); border:1px solid var(--border); border-radius:12px; padding:16px;}
+  .s-section h4{font-size:12.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-dim); margin-bottom:12px;}
+  .s-row{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;}
+  .s-row:last-child{margin-bottom:0;}
+  .s-row label{font-size:13px; color:var(--text-0); font-weight:500;}
+  .swatches{display:flex; gap:8px; flex-wrap:wrap;}
+  .swatch{
+    width:38px; height:38px; border-radius:9px; cursor:pointer; border:2px solid transparent; background-size:cover; background-position:center;
+  }
+  .swatch.active{border-color:var(--accent);}
+  .toggle{
+    width:44px; height:24px; border-radius:999px; background:var(--bg-2); position:relative; cursor:pointer;
+    border:1px solid var(--border); flex:0 0 auto;
+  }
+  .toggle .knob{
+    position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--text-dim);
+    transition: all .18s;
+  }
+  .toggle.on{background: rgba(124,92,252,0.3);}
+  .toggle.on .knob{left:22px; background:var(--accent);}
+  .settings-wrap input[type="text"]{
+    width:100%; padding:9px 11px; border-radius:8px; border:1px solid var(--border);
+    background: var(--bg-1); color:var(--text-0); font-size:12.5px; font-family:var(--font-mono); outline:none;
+  }
+  .settings-wrap input[type="text"]:focus{border-color:var(--accent);}
+  .mini-note{font-size:11px; color:var(--text-dim); margin-top:8px;}
+
+  /* ---------- GAMES LIBRARY (empty state) ---------- */
+  .empty{
+    height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    color:var(--text-dim); padding:30px; text-align:center;
+  }
+
+  #fps-overlay{
+    position:absolute; top:16px; left:50%; transform:translateX(-50%); z-index:60;
+    font-family:var(--font-mono); font-size:12px; color:var(--accent-2);
+    background: rgba(0,0,0,0.4); padding:4px 10px; border-radius:999px; display:none;
+    border:1px solid rgba(255,255,255,0.1);
+  }
+</style>
 </head>
+<body data-theme="dark">
+<div id="root">
 
-<body>
+  <!-- LOCK SCREEN -->
+  <div id="lock">
+    <div class="clock" id="lockClock">00:00</div>
+    <div class="date" id="lockDate">--</div>
+    <div class="lockbox">
+      <div class="avatar">N</div>
+      <div class="name">Usuario</div>
+      <input type="password" id="pwInput" placeholder="••••••" maxlength="12" autocomplete="off">
+      <div class="err" id="pwErr"></div>
+      <div class="hint">Pista: 123</div>
+    </div>
+  </div>
 
-<div id="login">
+  <!-- DESKTOP -->
+  <div id="desktop">
+    <div id="fps-overlay">-- FPS</div>
+    <div id="icons"></div>
 
-<h1>T9 OS</h1>
+    <div id="add-corner" title="Agregar juego / app">
+      <div class="plus">+</div>
+      <div class="label">Add games</div>
+    </div>
 
-<input
-type="password"
-id="password"
-placeholder="Contraseña">
+    <div id="windows-layer"></div>
 
-<button id="loginBtn">
-Entrar
-</button>
+    <div id="start-menu">
+      <div class="sm-item" data-action="settings"><div class="sm-icon">⚙️</div> Configuración</div>
+      <div class="sm-item" data-action="add"><div class="sm-icon">➕</div> Agregar juego / app</div>
+      <div class="sm-item" data-action="lock"><div class="sm-icon">🔒</div> Bloquear pantalla</div>
+    </div>
 
-<p id="error"></p>
-
-</div>
-
-<div id="desktop">
-
-<div id="wallpaper"></div>
-
-<div id="icons">
-
-<div class="icon" id="addGames">
-
-<div class="emoji">➕</div>
-
-<p>Add Games</p>
-
-</div>
-
-<div class="icon" id="settings">
-
-<div class="emoji">⚙️</div>
-
-<p>Configuración</p>
-
-</div>
-
-</div>
-
-<div id="window">
-
-<div id="windowBar">
-
-<span id="windowTitle">
-T9 OS
-</span>
-
-<button id="closeWindow">
-✖
-</button>
+    <div id="taskbar">
+      <button id="start-btn"><div class="logo"></div><span>NOVA</span></button>
+      <div id="taskbar-apps"></div>
+      <div id="tray">
+        <div id="fps-tray">-- FPS</div>
+        <div id="clock-tray"><div id="tray-time">00:00</div><div class="d" id="tray-date">--</div></div>
+      </div>
+    </div>
+  </div>
 
 </div>
 
-<iframe
-id="frame"
-src="">
-</iframe>
+<script>
+(function(){
+  "use strict";
 
-</div>
+  // ---------------- STATE ----------------
+  const state = {
+    unlocked: false,
+    theme: 'dark',
+    wallpaper: 'linear-gradient(135deg,#1b1030 0%,#0A0D14 60%)',
+    apps: [], // {id, name, icon, link}
+    windows: [], // {id, appId, x,y,w,h, z, title, icon, type}
+    zTop: 10,
+    fpsOn: false,
+    musicUrl: '',
+  };
+  let dragCtx = null;
+  let audioEl = null;
 
-<div id="taskbar">
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => document.querySelectorAll(sel);
 
-<button id="start">
-Inicio
-</button>
+  const PRESETS = [
+    {name:'Nebulosa', css:'linear-gradient(135deg,#1b1030 0%,#0A0D14 60%)'},
+    {name:'Aurora', css:'linear-gradient(135deg,#0f2027,#203a43,#2c5364)'},
+    {name:'Ámbar', css:'linear-gradient(135deg,#3a1c00,#7c3f00,#c2703d)'},
+    {name:'Menta', css:'linear-gradient(135deg,#003c30,#0f4c46,#37E6C4)'},
+    {name:'Rosa', css:'linear-gradient(135deg,#2b0a3d,#6a1b6f,#e0569b)'},
+    {name:'Grafito', css:'linear-gradient(135deg,#232526,#414345)'},
+  ];
 
-<div id="clock">
-00:00
-</div>
+  // ---------------- CLOCK ----------------
+  function fmtTime(d){
+    return d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  }
+  function fmtDate(d){
+    return d.toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long'});
+  }
+  function tickClock(){
+    const now = new Date();
+    $('#lockClock').textContent = fmtTime(now);
+    $('#lockDate').textContent = fmtDate(now);
+    $('#tray-time').textContent = fmtTime(now);
+    $('#tray-date').textContent = fmtDate(now);
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
 
-</div>
+  // ---------------- LOCK SCREEN ----------------
+  const pwInput = $('#pwInput');
+  const lockEl = $('#lock');
+  pwInput.addEventListener('keydown', e=>{
+    if(e.key === 'Enter') tryUnlock();
+  });
+  function tryUnlock(){
+    if(pwInput.value === '123'){
+      state.unlocked = true;
+      lockEl.classList.add('unlocking');
+      setTimeout(()=>{ lockEl.style.display='none'; }, 650);
+    } else {
+      $('#pwErr').textContent = 'Contraseña incorrecta';
+      lockEl.classList.remove('shake'); void lockEl.offsetWidth; lockEl.classList.add('shake');
+      pwInput.value = '';
+    }
+  }
+  setTimeout(()=>pwInput.focus(), 300);
 
-</div>
+  // ---------------- THEME ----------------
+  function applyTheme(t){
+    state.theme = t;
+    document.body.setAttribute('data-theme', t);
+  }
 
-<script src="script.js"></script>
+  // ---------------- WALLPAPER ----------------
+  function applyWallpaper(cssVal){
+    state.wallpaper = cssVal;
+    const d = $('#desktop');
+    if(/^https?:\/\//.test(cssVal) || cssVal.startsWith('www.')){
+      const url = cssVal.startsWith('www.') ? 'https://'+cssVal : cssVal;
+      d.style.background = `url("${url}") center/cover no-repeat`;
+    } else {
+      d.style.background = cssVal;
+    }
+  }
+  applyWallpaper(state.wallpaper);
 
+  // ---------------- ICONS / APPS ----------------
+  function normalizeUrl(u){
+    let url = u.trim();
+    if(url.startsWith('www.')) url = 'https://' + url;
+    return url;
+  }
+  function renderIcons(){
+    const wrap = $('#icons');
+    wrap.innerHTML = '';
+    state.apps.forEach(app=>{
+      const el = document.createElement('div');
+      el.className = 'icon';
+      el.innerHTML = `<div class="ico">${app.icon ? `<img src="${app.icon}" onerror="this.style.display='none'">` : '🎮'}</div><span>${escapeHtml(app.name)}</span>`;
+      el.addEventListener('dblclick', ()=> openGameWindow(app));
+      wrap.appendChild(el);
+    });
+  }
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------------- WINDOW MANAGEMENT ----------------
+  const winLayer = $('#windows-layer');
+  const taskbarApps = $('#taskbar-apps');
+
+  function createWindow({title, icon, type, contentEl, w=560, h=400}){
+    const id = 'w'+Math.random().toString(36).slice(2,9);
+    const winEl = document.createElement('div');
+    winEl.className = 'win' + (type ? ' '+type : '');
+    winEl.style.width = w+'px';
+    winEl.style.height = h+'px';
+    const x = 60 + Math.random()*120, y = 40 + Math.random()*80;
+    winEl.style.left = x+'px';
+    winEl.style.top = y+'px';
+    state.zTop++;
+    winEl.style.zIndex = state.zTop;
+    winEl.dataset.id = id;
+
+    winEl.innerHTML = `
+      <div class="win-bar">
+        <div class="win-title">${icon ? `<img src="${icon}" onerror="this.style.display='none'">` : ''}<span>${escapeHtml(title)}</span></div>
+        <div class="win-btns">
+          <button class="min" title="Minimizar">–</button>
+          <button class="close" title="Cerrar">✕</button>
+        </div>
+      </div>
+      <div class="win-body"></div>
+    `;
+    winEl.querySelector('.win-body').appendChild(contentEl);
+    winLayer.appendChild(winEl);
+
+    focusWindow(winEl);
+    winEl.addEventListener('mousedown', ()=>focusWindow(winEl));
+
+    // drag
+    const bar = winEl.querySelector('.win-bar');
+    bar.addEventListener('mousedown', e=>{
+      if(e.target.closest('.win-btns')) return;
+      dragCtx = {winEl, offX: e.clientX - winEl.offsetLeft, offY: e.clientY - winEl.offsetTop};
+    });
+
+    winEl.querySelector('.close').addEventListener('click', ()=>{
+      winEl.remove();
+      removeTaskItem(id);
+    });
+    winEl.querySelector('.min').addEventListener('click', ()=>{
+      winEl.style.display = winEl.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    addTaskItem(id, title, icon, winEl);
+    return winEl;
+  }
+
+  function focusWindow(winEl){
+    state.zTop++;
+    winEl.style.zIndex = state.zTop;
+    $$('.task-item').forEach(t=>t.classList.remove('active'));
+    const t = document.querySelector(`.task-item[data-id="${winEl.dataset.id}"]`);
+    if(t) t.classList.add('active');
+  }
+
+  function addTaskItem(id, title, icon, winEl){
+    const item = document.createElement('div');
+    item.className = 'task-item active';
+    item.dataset.id = id;
+    item.innerHTML = `${icon ? `<img src="${icon}" onerror="this.style.display='none'">`:''}<span>${escapeHtml(title)}</span>`;
+    item.addEventListener('click', ()=>{
+      winEl.style.display = 'flex';
+      focusWindow(winEl);
+    });
+    taskbarApps.appendChild(item);
+  }
+  function removeTaskItem(id){
+    const item = document.querySelector(`.task-item[data-id="${id}"]`);
+    if(item) item.remove();
+  }
+
+  document.addEventListener('mousemove', e=>{
+    if(!dragCtx) return;
+    const {winEl, offX, offY} = dragCtx;
+    let nx = e.clientX - offX, ny = e.clientY - offY;
+    nx = Math.max(0, Math.min(window.innerWidth - 100, nx));
+    ny = Math.max(0, Math.min(window.innerHeight - 40, ny));
+    winEl.style.left = nx+'px';
+    winEl.style.top = ny+'px';
+  });
+  document.addEventListener('mouseup', ()=> dragCtx = null);
+
+  function openGameWindow(app){
+    const iframe = document.createElement('iframe');
+    iframe.src = normalizeUrl(app.link);
+    iframe.setAttribute('allowfullscreen','true');
+    createWindow({title: app.name, icon: app.icon, type:'games', contentEl: iframe, w:720, h:480});
+  }
+
+  // ---------------- START MENU ----------------
+  const startBtn = $('#start-btn');
+  const startMenu = $('#start-menu');
+  startBtn.addEventListener('click', e=>{
+    e.stopPropagation();
+    startMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', e=>{
+    if(!startMenu.contains(e.target) && e.target !== startBtn){
+      startMenu.classList.remove('open');
+    }
+  });
+  startMenu.querySelectorAll('.sm-item').forEach(item=>{
+    item.addEventListener('click', ()=>{
+      startMenu.classList.remove('open');
+      const action = item.dataset.action;
+      if(action === 'settings') openSettings();
+      if(action === 'add') openAddModal();
+      if(action === 'lock') relock();
+    });
+  });
+
+  function relock(){
+    lockEl.style.display = 'flex';
+    lockEl.classList.remove('unlocking');
+    pwInput.value='';
+    $('#pwErr').textContent='';
+    setTimeout(()=>pwInput.focus(), 50);
+  }
+
+  // ---------------- ADD GAME MODAL ----------------
+  $('#add-corner').addEventListener('click', openAddModal);
+
+  function openAddModal(){
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="modal">
+        <h3>Agregar juego / app</h3>
+        <p class="sub">Se abrirá dentro de una ventana con iframe.</p>
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" id="fName" placeholder="Ej. Mi juego">
+        </div>
+        <div class="field">
+          <label>Link de la foto (ícono)</label>
+          <input type="text" id="fIcon" placeholder="https://.../imagen.png">
+        </div>
+        <div class="field">
+          <label>Link del juego / app (debe empezar con www.)</label>
+          <input type="text" id="fLink" placeholder="www.ejemplo.com">
+          <div class="err-msg" id="fLinkErr">El link debe empezar con "www."</div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn ghost" id="cancelAdd">Cancelar</button>
+          <button class="btn primary" id="confirmAdd">Agregar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('mousedown', e=>{ if(e.target===overlay) overlay.remove(); });
+    overlay.querySelector('#cancelAdd').addEventListener('click', ()=> overlay.remove());
+    overlay.querySelector('#confirmAdd').addEventListener('click', ()=>{
+      const name = overlay.querySelector('#fName').value.trim() || 'App';
+      const icon = overlay.querySelector('#fIcon').value.trim();
+      const link = overlay.querySelector('#fLink').value.trim();
+      const errEl = overlay.querySelector('#fLinkErr');
+      if(!link.startsWith('www.')){
+        errEl.style.display = 'block';
+        return;
+      }
+      errEl.style.display = 'none';
+      const app = {id:'a'+Math.random().toString(36).slice(2,8), name, icon, link};
+      state.apps.push(app);
+      renderIcons();
+      overlay.remove();
+    });
+  }
+
+  // ---------------- SETTINGS ----------------
+  function openSettings(){
+    // If already open, focus it
+    const existing = document.querySelector('.win.settings');
+    if(existing){ existing.style.display='flex'; focusWindow(existing); return; }
+
+    const body = document.createElement('div');
+    body.className = 'settings-wrap';
+    body.innerHTML = `
+      <div class="s-section">
+        <h4>Fondo de pantalla</h4>
+        <div class="swatches" id="wallSwatches"></div>
+        <div style="margin-top:12px;">
+          <input type="text" id="wallUrl" placeholder="Pega una URL de imagen (https://...)">
+        </div>
+        <div class="mini-note">También puedes usar una imagen personalizada pegando el link arriba.</div>
+      </div>
+
+      <div class="s-section">
+        <h4>Apariencia</h4>
+        <div class="s-row">
+          <label>Modo oscuro</label>
+          <div class="toggle ${state.theme==='dark'?'on':''}" id="themeToggle"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <div class="s-section">
+        <h4>Rendimiento</h4>
+        <div class="s-row">
+          <label>Contador de FPS</label>
+          <div class="toggle ${state.fpsOn?'on':''}" id="fpsToggle"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <div class="s-section">
+        <h4>Música</h4>
+        <div class="s-row" style="align-items:flex-start; flex-direction:column; gap:8px;">
+          <label>URL del audio</label>
+          <input type="text" id="musicUrl" placeholder="https://.../cancion.mp3" value="${state.musicUrl}">
+        </div>
+        <div class="modal-actions" style="margin-top:12px;">
+          <button class="btn ghost" id="musicStop">Detener</button>
+          <button class="btn primary" id="musicPlay">Reproducir</button>
+        </div>
+      </div>
+    `;
+    createWindow({title:'Configuración', icon:'', type:'settings', contentEl: body, w: 380, h: 560});
+
+    const swatchWrap = body.querySelector('#wallSwatches');
+    PRESETS.forEach(p=>{
+      const sw = document.createElement('div');
+      sw.className = 'swatch' + (state.wallpaper===p.css ? ' active':'');
+      sw.style.background = p.css;
+      sw.title = p.name;
+      sw.addEventListener('click', ()=>{
+        applyWallpaper(p.css);
+        swatchWrap.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+        sw.classList.add('active');
+      });
+      swatchWrap.appendChild(sw);
+    });
+
+    body.querySelector('#wallUrl').addEventListener('keydown', e=>{
+      if(e.key==='Enter'){
+        applyWallpaper(e.target.value.trim());
+        swatchWrap.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+      }
+    });
+
+    body.querySelector('#themeToggle').addEventListener('click', function(){
+      this.classList.toggle('on');
+      applyTheme(this.classList.contains('on') ? 'dark' : 'light');
+    });
+
+    body.querySelector('#fpsToggle').addEventListener('click', function(){
+      this.classList.toggle('on');
+      state.fpsOn = this.classList.contains('on');
+      $('#fps-overlay').style.display = state.fpsOn ? 'block' : 'none';
+      $('#fps-tray').style.display = state.fpsOn ? 'block' : 'none';
+    });
+
+    body.querySelector('#musicPlay').addEventListener('click', ()=>{
+      const url = body.querySelector('#musicUrl').value.trim();
+      if(!url) return;
+      state.musicUrl = url;
+      if(!audioEl){ audioEl = new Audio(); }
+      audioEl.src = url;
+      audioEl.loop = true;
+      audioEl.play().catch(()=>{});
+    });
+    body.querySelector('#musicStop').addEventListener('click', ()=>{
+      if(audioEl){ audioEl.pause(); }
+    });
+  }
+
+  // ---------------- FPS COUNTER ----------------
+  let frames = 0, lastTime = performance.now();
+  function fpsLoop(now){
+    frames++;
+    if(now - lastTime >= 1000){
+      const fps = Math.round(frames * 1000 / (now - lastTime));
+      $('#fps-overlay').textContent = fps + ' FPS';
+      $('#fps-tray').textContent = fps + ' FPS';
+      frames = 0;
+      lastTime = now;
+    }
+    requestAnimationFrame(fpsLoop);
+  }
+  requestAnimationFrame(fpsLoop);
+
+  renderIcons();
+})();
+</script>
 </body>
 </html>
