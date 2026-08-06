@@ -334,7 +334,10 @@
     zTop: 10,
     fpsOn: false,
     musicUrl: '',
+    useProxy: true,
   };
+  const PROXY_BASE = 'https://api.allorigins.win/raw?url=';
+  function proxied(url){ return PROXY_BASE + encodeURIComponent(url); }
   let dragCtx = null;
   let audioEl = null;
 
@@ -515,9 +518,12 @@
 
   function openGameWindow(app){
     const iframe = document.createElement('iframe');
-    iframe.src = normalizeUrl(app.link);
+    const fullUrl = normalizeUrl(app.link);
+    iframe.src = state.useProxy ? proxied(fullUrl) : fullUrl;
     iframe.setAttribute('allowfullscreen','true');
-    createWindow({title: app.name, icon: app.icon, type:'games', contentEl: iframe, w:720, h:480});
+    iframe.setAttribute('referrerpolicy','no-referrer');
+    const title = app.name + (state.useProxy ? ' (proxy)' : '');
+    createWindow({title, icon: app.icon, type:'games', contentEl: iframe, w:720, h:480});
   }
 
   // ---------------- START MENU ----------------
@@ -634,6 +640,15 @@
       </div>
 
       <div class="s-section">
+        <h4>Navegación</h4>
+        <div class="s-row">
+          <label>Abrir apps vía proxy</label>
+          <div class="toggle ${state.useProxy?'on':''}" id="proxyToggle"><div class="knob"></div></div>
+        </div>
+        <div class="mini-note">Ayuda a que más webs abran dentro del iframe. No es una VPN real: no oculta tu IP ni cifra la conexión, y algunos sitios pueden seguir sin funcionar bien.</div>
+      </div>
+
+      <div class="s-section">
         <h4>Música</h4>
         <div class="s-row" style="align-items:flex-start; flex-direction:column; gap:8px;">
           <label>URL del audio</label>
@@ -678,6 +693,11 @@
       state.fpsOn = this.classList.contains('on');
       $('#fps-overlay').style.display = state.fpsOn ? 'block' : 'none';
       $('#fps-tray').style.display = state.fpsOn ? 'block' : 'none';
+    });
+
+    body.querySelector('#proxyToggle').addEventListener('click', function(){
+      this.classList.toggle('on');
+      state.useProxy = this.classList.contains('on');
     });
 
     body.querySelector('#musicPlay').addEventListener('click', ()=>{
