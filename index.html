@@ -10,88 +10,79 @@
 
 <body>
 
-<!-- Pantalla de bloqueo -->
-<div id="lockScreen">
+<div id="login">
 
-    <div class="loginBox">
+<h1>T9 OS</h1>
 
-        <h1>T9 OS</h1>
+<input
+type="password"
+id="password"
+placeholder="Contraseña">
 
-        <p>Iniciar sesión</p>
+<button id="loginBtn">
+Entrar
+</button>
 
-        <input
-        id="password"
-        type="password"
-        placeholder="Contraseña">
-
-        <button id="loginBtn">
-            Entrar
-        </button>
-
-        <p id="loginError"></p>
-
-    </div>
+<p id="error"></p>
 
 </div>
 
-<!-- Escritorio -->
 <div id="desktop">
 
-    <div id="desktopIcons">
+<div id="wallpaper"></div>
 
-        <div class="desktopIcon" id="addGames">
+<div id="icons">
 
-            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828925.png">
+<div class="icon" id="addGames">
 
-            <span>Add Games</span>
+<div class="emoji">➕</div>
 
-        </div>
-
-        <div class="desktopIcon" id="settingsApp">
-
-            <img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png">
-
-            <span>Configuración</span>
-
-        </div>
-
-    </div>
-
-    <!-- Barra -->
-    <div id="taskbar">
-
-        <button id="startButton">
-            T9
-        </button>
-
-        <div id="taskbarClock">
-
-            00:00
-
-        </div>
-
-    </div>
+<p>Add Games</p>
 
 </div>
 
-<!-- Ventana -->
+<div class="icon" id="settings">
+
+<div class="emoji">⚙️</div>
+
+<p>Configuración</p>
+
+</div>
+
+</div>
+
 <div id="window">
 
-    <div id="windowHeader">
+<div id="windowBar">
 
-        <span id="windowTitle">
-            T9 OS
-        </span>
+<span id="windowTitle">
+T9 OS
+</span>
 
-        <button id="closeWindow">
-            ✖
-        </button>
+<button id="closeWindow">
+✖
+</button>
 
-    </div>
+</div>
 
-    <div id="windowContent">
+<iframe
+id="frame"
+src="">
+</iframe>
 
-    </div>
+</div>
+
+<div id="taskbar">
+
+<button id="start">
+Inicio
+</button>
+
+<div id="clock">
+00:00
+</div>
+
+</div>
 
 </div>
 
