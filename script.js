@@ -1,32 +1,45 @@
-// Contraseña temporal
 const PASSWORD = "123";
 
-// Entrar al sistema
-function login() {
-    const input = document.getElementById("password").value;
-    const error = document.getElementById("error");
+const lockScreen = document.getElementById("lockScreen");
+const desktop = document.getElementById("desktop");
+const loginBtn = document.getElementById("loginBtn");
+const passwordInput = document.getElementById("password");
+const loginError = document.getElementById("loginError");
 
-    if (input === PASSWORD) {
-        document.getElementById("lockScreen").style.display = "none";
-        document.getElementById("desktop").style.display = "block";
+desktop.style.display = "none";
+
+loginBtn.onclick = function () {
+
+    if (passwordInput.value === PASSWORD) {
+
+        lockScreen.style.display = "none";
+        desktop.style.display = "block";
+
     } else {
-        error.textContent = "Contraseña incorrecta";
+
+        loginError.textContent = "Contraseña incorrecta";
+
     }
+
+};
+
+function updateClock(){
+
+    const clock = document.getElementById("taskbarClock");
+
+    const d = new Date();
+
+    let h = d.getHours();
+    let m = d.getMinutes();
+
+    if(h < 10) h = "0" + h;
+    if(m < 10) m = "0" + m;
+
+    clock.textContent = h + ":" + m;
+
 }
 
-// Actualizar reloj
-function updateClock() {
-    const clock = document.getElementById("clock");
+updateClock();
 
-    if (!clock) return;
-
-    const now = new Date();
-
-    const h = String(now.getHours()).padStart(2, "0");
-    const m = String(now.getMinutes()).padStart(2, "0");
-clock.textContent = `${h}:${m}`;
-
-    clock.textContent = `${h}:${m}`;
-}
-
-setInterval(updateClock, 1000);
+setInterval(updateClock,1000);8
+);
